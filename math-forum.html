@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数学分析 · 研讨板</title>
+<style>
+  :root{
+    --ink:#1f2430;
+    --muted:#6f6a60;
+    --line:#e3ddcd;
+    --paper:#fffdf7;
+    --bg:#f3efe4;
+    --accent:#8a2b2b;
+    --accent-soft:#f6e7e2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Palatino Linotype",Georgia,"Source Han Serif SC","Songti SC","SimSun",serif;
+    font-size:16px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:780px;margin:0 auto;padding:0 18px}
+  header.topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(243,239,228,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;padding-bottom:12px}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .sigma{
+    font-size:26px;line-height:1;
+    width:44px;height:44px;flex:0 0 44px;
+    display:grid;place-items:center;
+    border:1px solid var(--line);border-radius:50%;
+    background:var(--paper);color:var(--accent);
+  }
+  .brand h1{font-size:19px;margin:0;letter-spacing:.5px;font-weight:600}
+  .brand .sub{margin:0;font-size:12px;color:var(--muted);letter-spacing:2px}
+  .userbox{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .avatar{
+    width:24px;height:24px;border-radius:50%;
+    display:grid;place-items:center;
+    color:#fff;font-size:12px;font-style:normal;
+    background:var(--accent);
+  }
+  main{padding:24px 0 80px}
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:18px;
+    box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  .tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .tab{
+    appearance:none;background:none;border:none;font:inherit;
+    padding:8px 14px;cursor:pointer;color:var(--muted);
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+  }
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+  label.field{display:block;margin-bottom:14px;font-size:13px;color:var(--muted);letter-spacing:1px}
+  label.field span{display:block;margin-bottom:6px}
+  input[type=text],input[type=password],input[type=email],textarea{
+    width:100%;font:inherit;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:8px;
+    padding:10px 12px;outline:none;transition:border-color .15s;
+  }
+  input:focus,textarea:focus{border-color:var(--accent)}
+  textarea{resize:vertical;min-height:96px;line-height:1.6}
+  .btn{
+    font:inherit;cursor:pointer;border-radius:8px;padding:8px 18px;
+    border:1px solid var(--line);background:#fff;color:var(--ink);
+    transition:background .15s,border-color .15s;
+  }
+  .btn:hover{border-color:#cbbfa8}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:#7a2323}
+  .btn.ghost{background:transparent}
+  .btn.small{padding:4px 12px;font-size:13px;border-radius:6px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .link-btn{appearance:none;background:none;border:none;font:inherit;color:var(--accent);cursor:pointer;padding:0;font-size:13px}
+  .err{color:#b03030;font-size:13px;margin:6px 0 0;min-height:18px}
+  .feed-head{display:flex;align-items:baseline;justify-content:space-between;margin:4px 2px 12px;font-size:13px;color:var(--muted);letter-spacing:1px}
+  .post{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+  .post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .post-name{font-weight:600;font-size:15px}
+  .post-time{font-size:12px;color:var(--muted);letter-spacing:.5px}
+  .post-body{white-space:pre-wrap;word-break:break-word;margin:0 0 12px}
+  .post-body:last-child{margin-bottom:0}
+  .post-img{display:block;max-width:100%;border-radius:8px;border:1px solid var(--line);margin:0 0 12px}
+  .post-tools{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--muted)}
+  .comments{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .comment{display:flex;gap:10px;padding:8px 0;font-size:14px}
+  .comment + .comment{border-top:1px solid rgba(0,0,0,.04)}
+  .comment-main{flex:1;min-width:0}
+  .comment-meta{font-size:12px;color:var(--muted);margin-bottom:2px}
+  .comment-text{white-space:pre-wrap;word-break:break-word}
+  .comment-del{appearance:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0 4px}
+  .comment-del:hover{color:#b03030}
+  .reply-row{display:flex;gap:8px;margin-top:10px}
+  .reply-row input{flex:1}
+  .empty{text-align:center;color:var(--muted);padding:44px 10px;font-size:14px;letter-spacing:1px}
+  .hint{font-size:12px;color:var(--muted);margin:10px 0 0;letter-spacing:.5px}
+  .preview{position:relative;display:inline-block;margin-bottom:12px}
+  .preview img{max-width:220px;max-height:160px;border-radius:8px;border:1px solid var(--line);display:block}
+  .preview button{
+    position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;
+    border:none;background:var(--ink);color:#fff;cursor:pointer;font-size:14px;line-height:1;
+  }
+  .composer-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+  .file-label{cursor:pointer;font-size:14px;padding:8px 16px;border:1px dashed #cbbfa8;border-radius:8px;color:var(--muted)}
+  .file-label:hover{border-color:var(--accent);color:var(--accent)}
+  #toast{
+    position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);
+    background:var(--ink);color:#fff;font-size:13px;letter-spacing:.5px;
+    padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;
+    transition:opacity .2s,transform .2s;z-index:99;
+  }
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 20px 40px;letter-spacing:1px}
+  @media (max-width:520px){
+    .brand .sub{display:none}
+    .post{padding:16px}
+    .card{padding:16px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <span class="sigma">&sum;</span>
+      <div>
+        <h1>数学分析 · 研讨板</h1>
+        <p class="sub">&epsilon;-&delta; 爱好者聚集地</p>
+      </div>
+    </div>
+    <div class="userbox" id="userBox"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="authSection">
+    <div class="tabs">
+      <button class="tab active" data-tab="login" type="button">登录</button>
+      <button class="tab" data-tab="register" type="button">注册</button>
+    </div>
+    <form id="authForm" autocomplete="on">
+      <label class="field"><span>用户名</span>
+        <input type="text" id="authUser" maxlength="16" placeholder="例如：Cauchy" required />
+      </label>
+      <label class="field"><span>密码</span>
+        <input type="password" id="authPass" maxlength="64" placeholder="至少 4 位" required />
+      </label>
+      <p class="err" id="authErr"></p>
+      <button class="btn primary" id="authSubmit" type="submit">登录</button>
+    </form>
+    <p class="hint">账号仅保存在本机浏览器（localStorage），用于演示，请勿使用真实密码。</p>
+  </section>
+
+  <section id="appSection" hidden>
+    <div class="card">
+      <textarea id="postText" placeholder="写下你的思考、疑问或反例……&#10;例如：证明 lim(n→∞) (1+1/n)^n = e 时，为什么必须先证单调有界？"></textarea>
+      <div class="preview" id="postPreview" hidden>
+        <img id="previewImg" alt="待发布图片预览" />
+        <button type="button" id="clearImg" title="移除图片">&times;</button>
+      </div>
+      <div class="composer-bar">
+        <label class="file-label" for="postImage">+ 图片</label>
+        <input type="file" id="postImage" accept="image/*" hidden />
+        <button class="btn primary" id="publishBtn" type="button">发布</button>
+      </div>
+    </div>
+
+    <div class="feed-head">
+      <span id="feedMeta">共 0 帖</span>
+      <button class="link-btn" id="orderBtn" type="button">切换为倒序</button>
+    </div>
+
+    <div id="feed"></div>
+  </section>
+</main>
+
+<footer>研讨板 · 内容仅存于本机 · 数学是自由的</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LS_USERS = "mf_users_v1";
+  var LS_POSTS = "mf_posts_v1";
+  var LS_SESSION = "mf_session_v1";
+
+  var users = load(LS_USERS, {});
+  var posts = load(LS_POSTS, []);
+  var session = load(LS_SESSION, null);
+  var order = "desc";
+  var pendingImage = "";
+
+  function load(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+  function save(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+  function savePosts() {
+    try {
+      save(LS_POSTS, posts);
+      return true;
+    } catch (e) {
+      toast("保存失败：本机存储已满，请删掉一些带图片的帖子");
+      return false;
+    }
+  }
+  var toastTimer = null;
+  function toast(msg) {
+    var el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2600);
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function now() {
+    return Date.now();
+  }
+  function fmtTime(ts) {
+    var d = new Date(ts);
+    var p = function (n) { return n < 10 ? "0" + n : "" + n; };
+    var today = new Date();
+    var sameDay = d.toDateString() === today.toDateString();
+    var hhmm = p(d.getHours()) + ":" + p(d.getMinutes());
+    if (sameDay) return "今天 " + hhmm;
+    var y = new Date(today.getTime() - 86400000);
+    if (d.toDateString() === y.toDateString()) return "昨天 " + hhmm;
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + hhmm;
+  }
+
+  /* ---------- 密码：优先 SHA-256，退回简单哈希 ---------- */
+  function simpleHash(str) {
+    var h = 5381;
+    for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return "s2:" + (h >>> 0).toString(16);
+  }
+  function hashPassword(pw) {
+    if (window.crypto && crypto.subtle && window.TextEncoder) {
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw)).then(
+        function (buf) {
+          var bytes = new Uint8Array(buf), out = "";
+          for (var i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, "0");
+          return "sha256:" + out;
+        },
+        function () { return simpleHash(pw); }
+      );
+    }
+    return Promise.resolve(simpleHash(pw));
+  }
+
+  /* ---------- 登录状态 ---------- */
+  var authMode = "login";
+  var authSection = document.getElementById("authSection");
+  var appSection = document.getElementById("appSection");
+  var userBox = document.getElementById("userBox");
+  var authForm = document.getElementById("authForm");
+  var authUser = document.getElementById("authUser");
+  var authPass = document.getElementById("authPass");
+  var authErr = document.getElementById("authErr");
+  var authSubmit = document.getElementById("authSubmit");
+
+  document.querySelectorAll(".tab").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      authMode = btn.dataset.tab;
+      document.querySelectorAll(".tab").forEach(function (b) {
+        b.classList.toggle("active", b === btn);
+      });
+      authSubmit.textContent = authMode === "login" ? "登录" : "注册并登录";
+      authErr.textContent = "";
+      authPass.setAttribute("autocomplete", authMode === "login" ? "current-password" : "new-password");
+    });
+  });
+
+  authForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = authUser.value.trim();
+    var pw = authPass.value;
+    authErr.textContent = "";
+    if (!name || !pw) { authErr.textContent = "用户名和密码都要填。"; return; }
+    if (users[name]) {
+      if (authMode === "register") { authErr.textContent = "这个用户名已被占用。"; return; }
+    } else if (authMode === "login") {
+      authErr.textContent = "用户不存在，先注册吧。";
+      return;
+    }
+    if (pw.length < 4) { authErr.textContent = "密码至少 4 位。"; return; }
+
+    hashPassword(pw).then(function (digest) {
+      if (authMode === "register") {
+        users[name] = { password: digest, createdAt: now() };
+        save(LS_USERS, users);
+      } else if (users[name].password !== digest) {
+        authErr.textContent = "密码不对。";
+        return;
+      }
+      session = { name: name };
+      save(LS_SESSION, session);
+      authForm.reset();
+      renderSession();
+      renderFeed();
+    });
+  });
+
+  function renderSession() {
+    if (session && users[session.name]) {
+      authSection.hidden = true;
+      appSection.hidden = false;
+      userBox.innerHTML =
+        '<span class="avatar">' + esc(session.name.charAt(0).toUpperCase()) + "</span>" +
+        "<span>" + esc(session.name) + "</span>" +
+        '<button class="link-btn" id="logoutBtn" type="button">退出</button>';
+      document.getElementById("logoutBtn").addEventListener("click", function () {
+        session = null;
+        localStorage.removeItem(LS_SESSION);
+        renderSession();
+      });
+    } else {
+      session = null;
+      authSection.hidden = false;
+      appSection.hidden = true;
+      userBox.innerHTML = '<span>未登录</span>';
+    }
+  }
+
+  /* ---------- 发帖 ---------- */
+  var postText = document.getElementById("postText");
+  var postImage = document.getElementById("postImage");
+  var postPreview = document.getElementById("postPreview");
+  var previewImg = document.getElementById("previewImg");
+  var clearImg = document.getElementById("clearImg");
+  var publishBtn = document.getElementById("publishBtn");
+
+  postImage.addEventListener("change", function () {
+    var file = postImage.files && postImage.files[0];
+    if (!file) return;
+    compressImage(file).then(function (dataUrl) {
+      pendingImage = dataUrl;
+      previewImg.src = dataUrl;
+      postPreview.hidden = false;
+    }).catch(function () {
+      toast("这张图片读取失败，换一张试试");
+    });
+    postImage.value = "";
+  });
+
+  clearImg.addEventListener("click", function () {
+    pendingImage = "";
+    previewImg.removeAttribute("src");
+    postPreview.hidden = true;
+  });
+
+  function compressImage(file, maxW, quality) {
+    maxW = maxW || 1280;
+    quality = quality || 0.82;
+    return new Promise(function (resolve, reject) {
+      if (!/^image\//.test(file.type)) { reject(new Error("not image")); return; }
+      var reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = reject;
+        img.onload = function () {
+          var w = img.naturalWidth, h = img.naturalHeight;
+          if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+          var canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  publishBtn.addEventListener("click", function () {
+    if (!session) return;
+    var text = postText.value.trim();
+    if (!text && !pendingImage) {
+      postText.focus();
+      return;
+    }
+    posts.push({
+      id: uid(),
+      author: session.name,
+      text: text,
+      image: pendingImage,
+      createdAt: now(),
+      comments: []
+    });
+    if (!savePosts()) { posts.pop(); return; }
+    postText.value = "";
+    pendingImage = "";
+    previewImg.removeAttribute("src");
+    postPreview.hidden = true;
+    renderFeed();
+  });
+
+  /* ---------- 时间线 ---------- */
+  var feed = document.getElementById("feed");
+  var feedMeta = document.getElementById("feedMeta");
+  var orderBtn = document.getElementById("orderBtn");
+
+  orderBtn.addEventListener("click", function () {
+    order = order === "desc" ? "asc" : "desc";
+    orderBtn.textContent = order === "desc" ? "切换为倒序" : "切换为顺序";
+    renderFeed();
+  });
+
+  function renderFeed() {
+    var list = posts.slice().sort(function (a, b) {
+      return order === "desc" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt;
+    });
+    feedMeta.textContent = "共 " + posts.length + " 帖 · 按时间" + (order === "desc" ? "倒序" : "顺序");
+
+    if (!list.length) {
+      feed.innerHTML = '<div class="empty">还没有帖子。开个头吧，比如：<br>「求问，一致连续与 Lipschitz 连续谁更强？」</div>';
+      return;
+    }
+
+    feed.innerHTML = list.map(function (p) {
+      var mine = session && session.name === p.author;
+      var comments = p.comments.map(function (c) {
+        var cMine = session && session.name === c.author;
+        return (
+          '<div class="comment">' +
+            '<span class="avatar">' + esc(c.author.charAt(0).toUpperCase()) + "</span>" +
+            '<div class="comment-main">' +
+              '<div class="comment-meta">' + esc(c.author) + " · " + fmtTime(c.createdAt) + "</div>" +
+              '<div class="comment-text">' + esc(c.text) + "</div>" +
+            "</div>" +
+            (cMine ? '<button class="comment-del" data-del-comment="' + p.id + ":" + c.id + '" title="删除这条评论">&times;</button>' : "") +
+          "</div>"
+        );
+      }).join("");
+
+      return (
+        '<article class="post">' +
+          '<div class="post-head">' +
+            '<span class="avatar">' + esc(p.author.charAt(0).toUpperCase()) + "</span>" +
+            '<div>' +
+              '<div class="post-name">' + esc(p.author) + "</div>" +
+              '<div class="post-time">' + fmtTime(p.createdAt) + "</div>" +
+            "</div>" +
+            (mine ? '<button class="comment-del" data-del-post="' + p.id + '" title="删除帖子">&times;</button>' : "") +
+          "</div>" +
+          (p.text ? '<p class="post-body">' + esc(p.text) + "</p>" : "") +
+          (p.image ? '<img class="post-img" src="' + p.image + '" alt="帖子配图" loading="lazy" />' : "") +
+          '<div class="comments">' +
+            (comments || '<div class="comment-meta">还没有评论。</div>') +
+            (session
+              ? '<div class="reply-row">' +
+                  '<input type="text" maxlength="300" placeholder="写下评论，回车发送" data-reply-input="' + p.id + '" />' +
+                  '<button class="btn small" data-reply="' + p.id + '" type="button">发送</button>' +
+                "</div>"
+              : "") +
+          "</div>" +
+        "</article>"
+      );
+    }).join("");
+  }
+
+  /* ---------- 评论 / 删除（事件委托） ---------- */
+  function addComment(postId, input) {
+    if (!session) return;
+    var text = input.value.trim();
+    if (!text) { input.focus(); return; }
+    var post = posts.filter(function (p) { return p.id === postId; })[0];
+    if (!post) return;
+    post.comments.push({ id: uid(), author: session.name, text: text, createdAt: now() });
+    if (!savePosts()) { post.comments.pop(); return; }
+    renderFeed();
+  }
+
+  feed.addEventListener("click", function (e) {
+    var t = e.target;
+
+    var delPost = t.closest("[data-del-post]");
+    if (delPost) {
+      if (delPost.getAttribute("data-armed") !== "1") {
+        delPost.setAttribute("data-armed", "1");
+        delPost.textContent = "确认删除？";
+        setTimeout(function () {
+          if (delPost.isConnected) {
+            delPost.removeAttribute("data-armed");
+            delPost.textContent = "\u00d7";
+          }
+        }, 3000);
+        return;
+      }
+      posts = posts.filter(function (p) { return p.id !== delPost.getAttribute("data-del-post"); });
+      savePosts();
+      renderFeed();
+      return;
+    }
+
+    var delComment = t.closest("[data-del-comment]");
+    if (delComment) {
+      var pair = delComment.getAttribute("data-del-comment").split(":");
+      var pid = pair[0], cid = pair[1];
+      posts.forEach(function (p) {
+        if (p.id === pid) p.comments = p.comments.filter(function (c) { return c.id !== cid; });
+      });
+      savePosts();
+      renderFeed();
+      return;
+    }
+
+    var replyBtn = t.closest("[data-reply]");
+    if (replyBtn) {
+      var id = replyBtn.getAttribute("data-reply");
+      var input = feed.querySelector('[data-reply-input="' + id + '"]');
+      if (input) addComment(id, input);
+    }
+  });
+
+  feed.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    var input = e.target;
+    if (!input.matches("[data-reply-input]")) return;
+    e.preventDefault();
+    addComment(input.getAttribute("data-reply-input"), input);
+  });
+
+  /* ---------- 启动 ---------- */
+  renderSession();
+  if (session) renderFeed();
+})();
+</script>
+</body>
+</html>
